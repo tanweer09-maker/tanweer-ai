@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tanweer Raza ka AI Chat 🤖</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+  body {
+    margin: 0; padding: 0; background: linear-gradient(135deg, #1f1c2c, #928dab);
+    font-family: 'Poppins', sans-serif; color: #fff; display: flex; flex-direction: column;
+    height: 100vh; justify-content: center; align-items: center;
+  }
+  .container {
+    background: rgba(0,0,0,0.8);
+    width: 95%;
+    max-width: 600px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px #00ffe1;
+    display: flex; flex-direction: column;
+    height: 80vh;
+  }
+  header {
+    padding: 20px; background: #111;
+    text-align: center;
+    border-radius: 15px 15px 0 0;
+  }
+  header h1 {
+    margin: 0; font-weight: 700; font-size: 1.8rem;
+  }
+  header p {
+    margin-top: 6px; font-size: 0.9rem; color: #00ffe1;
+  }
+  #chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #222;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+  }
+  .message {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 15px;
+    max-width: 75%;
+    line-height: 1.4;
+  }
+  .user-msg {
+    background: #00ffe1;
+    color: #000;
+    align-self: flex-end;
+    border-radius: 15px 15px 0 15px;
+  }
+  .ai-msg {
+    background: #444;
+    color: #fff;
+    align-self: flex-start;
+    border-radius: 15px 15px 15px 0;
+  }
+  .input-area {
+    display: flex;
+    padding: 15px;
+    background: #111;
+    border-radius: 0 0 15px 15px;
+  }
+  #user-input {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+  }
+  #send-btn {
+    margin-left: 15px;
+    background: #00ffe1;
+    border: none;
+    border-radius: 25px;
+    padding: 0 20px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #000;
+    transition: background 0.3s ease;
+  }
+  #send-btn:hover {
+    background: #00ccaa;
+  }
+  footer {
+    text-align: center;
+    padding: 12px 0;
+    font-size: 0.8rem;
+    background: #111;
+    color: #00ffe1;
+    user-select: none;
+  }
+  a {
+    color: #00ffe1;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Tanweer Raza ka AI Chat 🤖</h1>
+      <p>Baat kar, maze kar, ya bakchodi bhi kar! Hindi/English dono chalega.</p>
+    </header>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Apni baat likh..." autocomplete="off" />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+  <footer>
+    © 2025 Tanweer Raza | Powered by <a href="https://openai.com" target="_blank">OpenAI ChatGPT</a>
+  </footer>
+
+<script>
+  const chatBox = document.getElementById('chat-box');
+  const userInput = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  // Add message to chat box
+  function addMessage(text, sender = 'ai') {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message');
+    msgDiv.classList.add(sender === 'user' ? 'user-msg' : 'ai-msg');
+    msgDiv.textContent = text;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Show typing indicator
+  function addTyping() {
+    const typingDiv = document.createElement('div');
+    typingDiv.classList.add('message', 'ai-msg');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.textContent = 'Tanweer AI typing... 📝';
+    chatBox.appendChild(typingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Remove typing indicator
+  function removeTyping() {
+    const typing = document.getElementById('typing-indicator');
+    if (typing) typing.remove();
+  }
+
+  // Call OpenAI API
+  async function getAIResponse(message) {
+    // Replace YOUR_API_KEY below with your OpenAI API key
+    const API_KEY = 'YOUR_API_KEY';
+
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    const body = {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a friendly, funny AI friend who can chat in Hindi and English, with a cool GenZ style, sometimes a bit masti and bakchodi.' },
+        { role: 'user', content: message }
+      ],
+      temperature: 0.9,
+      max_tokens: 500,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0.6
+    };
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      if(data.error) {
+        removeTyping();
+        addMessage('🤖 Tanweer AI: Error — ' + data.error.message);
+        return;
+      }
+
+      const aiText = data.choices[0].message.content.trim();
+      removeTyping();
+      addMessage(aiText, 'ai');
+    } catch (error) {
+      removeTyping();
+      addMessage('🤖 Tanweer AI: Oops! Koi technical dikkat hai. Try dobara.', 'ai');
+      console.error(error);
+    }
+  }
+
+  // Handle send message event
+  async function sendMessage() {
+    const message = userInput.value.trim();
+    if(!message) return;
+
+    addMessage(message, 'user');
+    userInput.value = '';
+    addTyping();
+
+    await getAIResponse(message);
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  userInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+</script>
+</body>
+</html>
